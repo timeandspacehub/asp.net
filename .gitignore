@@ -1,0 +1,49 @@
+# Build artifacts
+bin/
+obj/
+
+
+# Visual Studio working folder
+.vs/
+
+# Rider
+.idea/
+*.sln.iml
+
+
+# Auto-generated files
+Generated/
+
+# Logs
+*.log
+logs/
+
+# NPM-related (if applicable)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# JetBrains Rider files
+.idea/
+*.sln.iml
+
+# OS-specific files
+Thumbs.db
+*.DS_Store
+
+# Backup files
+*.bak
+*.swp
+*~
+
+
+# Dotnet Tool files
+*.cache/
+*.templateengine/
+
+# Configuration files
+*.config
+
+# Package directories
+packages/
