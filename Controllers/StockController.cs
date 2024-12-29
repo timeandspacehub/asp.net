@@ -6,6 +6,7 @@ using asp.net.Data;
 using asp.net.Dtos.Stock;
 using asp.net.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace asp.net.Controllers
 {
@@ -23,19 +24,27 @@ namespace asp.net.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll(){
+        public async Task<IActionResult> GetAll(){
 
-            //Get all stock objects from DB, then use Select method similar to map method JS
-            //to iterate over each element & transform each Stock object to StockDto object
-            //using the arrow function.
-            var stocks = _context.Stock.ToList().Select(s => s.ToStockDto());
+        // The await keyword ensures that the line waits for the asynchronous operation (ToListAsync) 
+        // to complete before proceeding to the next line. While the code is "waiting," the thread is not
+        // blocked—it is free to do other work in the application (e.g., handling other requests in a web server context).
 
-            return Ok(stocks);
+        // Once the ToListAsync operation completes, the stocks variable is assigned the result, and the 
+        // program execution resumes with the next line: 
+
+            var stocks = await _context.Stock.ToListAsync();
+
+        // The next line (stocks.Select) will not execute until ToListAsync has finished fetching the data 
+        // from the database and returned the result. 
+            var stockDto = stocks.Select(s => s.ToStockDto());
+    
+            return Ok(stockDto);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id){
-            var stock = _context.Stock.Find(id);
+        public async Task<IActionResult> GetById([FromRoute] int id){
+            var stock = await _context.Stock.FindAsync(id);
 
             if(stock == null){
                 return NotFound();
@@ -48,11 +57,11 @@ namespace asp.net.Controllers
 
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateStockRequestDto stockDto){
+        public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto){
 
             var stockModel = stockDto.ToStockFromCreateDto();
-            _context.Stock.Add(stockModel);
-            _context.SaveChanges();
+            await _context.Stock.AddAsync(stockModel);
+            await _context.SaveChangesAsync();
 
             //Below createAtAction first parameter is the name of the method declared in this controller file.
             //Second parameter is the id that is assigned by the SQL Server to the newly created object.
@@ -64,11 +73,11 @@ namespace asp.net.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto){
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto){
 
             //1. First check and see if the provided id exists in the DB.
             //If it does, get that object and store in stockModel variable
-            var stockModel = _context.Stock.FirstOrDefault(x => x.Id == id);
+            var stockModel = await _context.Stock.FirstOrDefaultAsync(x => x.Id == id);
 
             if(stockModel == null){
                 return NotFound();
@@ -82,26 +91,26 @@ namespace asp.net.Controllers
             stockModel.Industry = updateDto.Industry;
             stockModel.MarketCap = updateDto.MarketCap;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(stockModel.ToStockDto());
         }
 
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id){
+        public async Task<IActionResult> Delete([FromRoute] int id){
 
             //1. First check and see if the provided id exists in the DB.
             //If it does, get that object and store in stockModel variable
-            var stockModel = _context.Stock.FirstOrDefault(x => x.Id == id);
+            var stockModel = await _context.Stock.FirstOrDefaultAsync(x => x.Id == id);
 
             if(stockModel == null){
                 return NotFound();
             }
 
-            //2. Delete the record
+            //2. Delete the record - don't add async to Delete, it's not an async function
             _context.Stock.Remove(stockModel);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
