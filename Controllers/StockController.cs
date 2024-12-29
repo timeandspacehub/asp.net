@@ -85,5 +85,25 @@ namespace asp.net.Controllers
             _context.SaveChanges();
             return Ok(stockModel.ToStockDto());
         }
+
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete([FromRoute] int id){
+
+            //1. First check and see if the provided id exists in the DB.
+            //If it does, get that object and store in stockModel variable
+            var stockModel = _context.Stock.FirstOrDefault(x => x.Id == id);
+
+            if(stockModel == null){
+                return NotFound();
+            }
+
+            //2. Delete the record
+            _context.Stock.Remove(stockModel);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
