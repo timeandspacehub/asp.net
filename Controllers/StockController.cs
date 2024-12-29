@@ -60,5 +60,30 @@ namespace asp.net.Controllers
             return CreatedAtAction(nameof(GetById), new {id = stockModel.Id}, stockModel.ToStockDto());
 
         }
+
+
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto){
+
+            //1. First check and see if the provided id exists in the DB.
+            //If it does, get that object and store in stockModel variable
+            var stockModel = _context.Stock.FirstOrDefault(x => x.Id == id);
+
+            if(stockModel == null){
+                return NotFound();
+            }
+
+            //2. Update db value with the new values user has provided.
+            stockModel.Symbol = updateDto.Symbol;
+            stockModel.CompanyName = updateDto.CompanyName;
+            stockModel.Purchase = updateDto.Purchase;
+            stockModel.LastDiv = updateDto.LastDiv;
+            stockModel.Industry = updateDto.Industry;
+            stockModel.MarketCap = updateDto.MarketCap;
+
+            _context.SaveChanges();
+            return Ok(stockModel.ToStockDto());
+        }
     }
 }
