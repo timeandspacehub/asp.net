@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using asp.net.Data;
+using asp.net.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace asp.net.Controllers
@@ -22,7 +23,12 @@ namespace asp.net.Controllers
 
         [HttpGet]
         public IActionResult GetAll(){
-            var stocks = _context.Stock.ToList();
+
+            //Get all stock objects from DB, then use Select method similar to map method JS
+            //to iterate over each element & transform each Stock object to StockDto object
+            //using the arrow function.
+            var stocks = _context.Stock.ToList().Select(s => s.ToStockDto());
+
             return Ok(stocks);
         }
 
@@ -34,7 +40,9 @@ namespace asp.net.Controllers
                 return NotFound();
             }
 
-            return Ok(stock);
+            //For singel object transformation call the static method directly,
+            //no need to use Select method
+            return Ok(stock.ToStockDto());
         }
     }
 }
