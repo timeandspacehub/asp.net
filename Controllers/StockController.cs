@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using asp.net.Data;
 using asp.net.Dtos.Stock;
+using asp.net.Interfaces;
 using asp.net.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,9 +18,11 @@ namespace asp.net.Controllers
     {
         
         private readonly ApplicationDBContext _context;
+        private readonly IStockRepository _stockRepo;
 
-        public StockController(ApplicationDBContext context)
+        public StockController(ApplicationDBContext context, IStockRepository stockRepo)
         {
+            _stockRepo = stockRepo;
             _context = context;
         }
 
@@ -33,7 +36,7 @@ namespace asp.net.Controllers
         // Once the ToListAsync operation completes, the stocks variable is assigned the result, and the 
         // program execution resumes with the next line: 
 
-            var stocks = await _context.Stock.ToListAsync();
+            var stocks = await _stockRepo.GetAllAsync();
 
         // The next line (stocks.Select) will not execute until ToListAsync has finished fetching the data 
         // from the database and returned the result. 
