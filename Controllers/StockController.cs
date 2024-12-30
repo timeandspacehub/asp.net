@@ -47,7 +47,7 @@ namespace asp.net.Controllers
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id){
-            var stock = await _context.Stock.FindAsync(id);
+            var stock = await _stockRepo.GetByIdAsync(id);
 
             if(stock == null){
                 return NotFound();
@@ -63,8 +63,7 @@ namespace asp.net.Controllers
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto){
 
             var stockModel = stockDto.ToStockFromCreateDto();
-            await _context.Stock.AddAsync(stockModel);
-            await _context.SaveChangesAsync();
+            await _stockRepo.CreateAsync(stockModel);
 
             //Below createAtAction first parameter is the name of the method declared in this controller file.
             //Second parameter is the id that is assigned by the SQL Server to the newly created object.
@@ -80,21 +79,12 @@ namespace asp.net.Controllers
 
             //1. First check and see if the provided id exists in the DB.
             //If it does, get that object and store in stockModel variable
-            var stockModel = await _context.Stock.FirstOrDefaultAsync(x => x.Id == id);
+            var stockModel = await _stockRepo.UpdateAsync(id, updateDto);
 
             if(stockModel == null){
                 return NotFound();
             }
-
-            //2. Update db value with the new values user has provided.
-            stockModel.Symbol = updateDto.Symbol;
-            stockModel.CompanyName = updateDto.CompanyName;
-            stockModel.Purchase = updateDto.Purchase;
-            stockModel.LastDiv = updateDto.LastDiv;
-            stockModel.Industry = updateDto.Industry;
-            stockModel.MarketCap = updateDto.MarketCap;
-
-            await _context.SaveChangesAsync();
+            
             return Ok(stockModel.ToStockDto());
         }
 
@@ -102,19 +92,12 @@ namespace asp.net.Controllers
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id){
-
-            //1. First check and see if the provided id exists in the DB.
-            //If it does, get that object and store in stockModel variable
-            var stockModel = await _context.Stock.FirstOrDefaultAsync(x => x.Id == id);
+            var stockModel = await _stockRepo.DeleteAsync(id);
 
             if(stockModel == null){
                 return NotFound();
             }
-
-            //2. Delete the record - don't add async to Delete, it's not an async function
-            _context.Stock.Remove(stockModel);
-            await _context.SaveChangesAsync();
-
+            
             return NoContent();
         }
     }
